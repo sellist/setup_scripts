@@ -7,6 +7,12 @@ if [ $# -lt 4 ]; then
   exit 1
 fi
 
+#check if ufw is installed
+if ! command -v ufw &> /dev/null
+then
+    echo "ufw could not be found, please run the basics setup script first."
+    exit
+
 DB_USER="$1"
 DB_PASS="$2"
 DB_NAME="$3"
@@ -37,6 +43,13 @@ sed -i "s/^#listen_addresses =.*/listen_addresses = '*'/" "$PG_CONF"
 for IP in "${ALLOWED_IPS[@]}"; do
   echo "host    all             all             $IP/32            md5" >> "$PG_HBA"
   echo "Added access for IP: $IP"
+done
+
+# Configure UFW to allow PostgreSQL access from allowed IPs
+echo "Configuring UFW to allow PostgreSQL access..."
+for IP in "${ALLOWED_IPS[@]}"; do
+  ufw allow from "$IP" to any port 5432 proto tcp
+  echo "UFW rule added for IP: $IP"
 done
 
 # Set up user and database
@@ -71,3 +84,4 @@ systemctl restart postgresql
 
 echo "PostgreSQL installation and setup complete."
 echo "Network access enabled for: ${ALLOWED_IPS[*]}"
+echo
