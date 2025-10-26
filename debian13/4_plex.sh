@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+#container volume bindings (container path : host path)
+#data/[music/movies/tv] : /srv/plex/media[/music/movies/tv]
+
 PLEX_CLAIM="${1:-}"
 PLEX_NAME="plex"
 IMAGE="lscr.io/linuxserver/plex:latest"
